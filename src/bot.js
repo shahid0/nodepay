@@ -1,8 +1,6 @@
-
 const axios = require('axios'); 
-const crypto = require('crypto');
+const crypto = require('crypto'); 
 const ProxyChecker = require('./proxyChecker'); 
-
 
 class Bot {
   constructor(config, logger) {
@@ -11,15 +9,13 @@ class Bot {
     this.proxyCheck = new ProxyChecker(config, logger); 
   }
 
-
+  
   async connect(token, proxy = null) {
     try {
-      const userAgent = 'Mozilla/5.0 ... Safari/537.3'; 
-      const accountInfo = await this.getSession(token, userAgent, proxy); 
+      const userAgent = 'Mozilla/5.0 ... Safari/537.3'; // 设置 User-Agent
+      const accountInfo = await this.getSession(token, userAgent, proxy); // 获取会话信息
 
-      console.log(
-        `✅ ${'已连接到会话'.green} UID: ${accountInfo.uid}` 
-      );
+      console.log(`✅ ${'已连接会话'.green}，UID: ${accountInfo.uid}`);
       this.logger.info('会话信息', {
         uid: accountInfo.uid,
         name: accountInfo.name,
@@ -28,19 +24,20 @@ class Bot {
 
       console.log('');
 
+    
       const interval = setInterval(async () => {
         try {
-          await this.sendPing(accountInfo, token, userAgent, proxy); 
+          await this.sendPing(accountInfo, token, userAgent, proxy);
         } catch (error) {
-          console.log(`❌ ${'心跳包错误'.red}: ${error.message}`);
-          this.logger.error('心跳包错误', { error: error.message });
+          console.log(`❌ ${'心跳错误'.red}: ${error.message}`);
+          this.logger.error('心跳错误', { error: error.message });
         }
-      }, this.config.retryInterval); 
+      }, this.config.retryInterval);
 
      
       if (!process.listenerCount('SIGINT')) {
         process.once('SIGINT', () => {
-          clearInterval(interval); 
+          clearInterval(interval);
           console.log('\n👋 正在关闭...');
         });
       }
@@ -50,7 +47,7 @@ class Bot {
     }
   }
 
-  // 获取会话信息
+ 
   async getSession(token, userAgent, proxy) {
     try {
       const config = {
@@ -66,8 +63,8 @@ class Bot {
         config.proxy = this.buildProxyConfig(proxy); 
       }
 
-      const response = await axios.post(this.config.sessionURL, {}, config); 
-      return response.data.data;
+      const response = await axios.post(this.config.sessionURL, {}, config);
+      return response.data.data; // 返回会话数据
     } catch (error) {
       throw new Error('会话请求失败');
     }
@@ -83,7 +80,7 @@ class Bot {
       id: uid,
       browser_id: browserId,
       timestamp: Math.floor(Date.now() / 1000), 
-      version: '2.2.7', 
+      version: '2.2.7',
     };
 
     try {
@@ -97,18 +94,18 @@ class Bot {
       };
 
       if (proxy) {
-        config.proxy = this.buildProxyConfig(proxy);
+        config.proxy = this.buildProxyConfig(proxy); 
       }
 
-      await axios.post(this.config.pingURL, pingData, config); 
-      console.log(`📡 ${'已发送心跳包'.cyan} UID: ${uid}`);
-      this.logger.info('已发送心跳包', {
+      await axios.post(this.config.pingURL, pingData, config);
+      console.log(`📡 ${'已发送心跳'.cyan}，UID: ${uid}`);
+      this.logger.info('已发送心跳', {
         uid,
         browserId,
-        ip: proxy ? proxy.host : '直连',
+        ip: proxy ? proxy.host : 'direct',
       });
     } catch (error) {
-      throw new Error('心跳包请求失败');
+      throw new Error('心跳请求失败');
     }
   }
 
@@ -116,16 +113,16 @@ class Bot {
   buildProxyConfig(proxy) {
     return proxy && proxy.host
       ? {
-          host: proxy.host, 
-          port: parseInt(proxy.port), 
+          host: proxy.host,
+          port: parseInt(proxy.port),
           auth:
             proxy.username && proxy.password
-              ? { username: proxy.username, password: proxy.password } 
+              ? { username: proxy.username, password: proxy.password }
               : undefined,
         }
       : undefined;
   }
 }
 
+module.exports = Bot; 
 
-module.exports = Bot;
