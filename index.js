@@ -17,7 +17,7 @@ async function main() {
   const logger = initLogger();
 
   const tokens = await readLines('token.txt');
-  const useProxy = await askProxyMode();
+  const useProxy = true;
 
   let proxies = [];
   if (useProxy) {
@@ -44,7 +44,7 @@ async function main() {
     }
   }
 
-  const accountType = await askAccountType();
+  const accountType = '单个账户';
   const bot = new Bot(config, logger);
 
   if (accountType === '单个账户') {
